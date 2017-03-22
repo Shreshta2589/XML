@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <title>Airline Listing</title>
+    </head>
+    <script type="text/javascript">
+        var xmlDoc; 
+        function loadXML(url) 
+        {       
+            if (window.XMLHttpRequest)   
+            {
+                xmlhttp=new XMLHttpRequest();    
+            }  
+            else   
+            {    
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");   
+            }   
+            xmlhttp.open("GET",url,false); 
+            try
+            {
+                xmlhttp.send();
+            }
+            catch(err)
+            {
+                window.alert("File Does Not Exist");
+                return false;
+            }                
+            xmlDoc=xmlhttp.responseXML; 
+            return xmlDoc;  
+        }
+        
+        function validateXML()
+        {
+            var x = document.getElementById("xmlfile").value;
+            xmlData = loadXML(x);
+            if (x == "")
+            {
+                window.alert("No URL entered");
+                return false;
+            }
+           
+            if (xmlData == null)
+            {
+                window.alert("Invalid File");
+                return false;
+            }
+            if (xmlData.activeElement.tagName=="parseerror")
+                {
+                   window.alert("Invalid XML");
+                   return false; 
+                }
+            if(xmlData.getElementsByTagName("Row").length == 0)
+            {
+                window.alert("No records found");
+                return false;
+            }
+            parseXML(xmlData);
+        }
+        
+        function parseXML(xmldoc)
+        {
+            htmlText="<html><title>Airlines</title><body>";
+            htmlText += "<table border='1' width=auto ><tr>" ;
+            header = xmlDoc.getElementsByTagName("Header")[0];
+            data = header.getElementsByTagName("Data");
+            
+            for (i=0;i<data.length;i++)
+            {
+                heading = data[i].childNodes[0].nodeValue;
+                htmlText += "<th>"+heading+"</th>";
+            }
+            htmlText += "</tr>";
+            
+            airlinehost = xmlDoc.getElementsByTagName("Row");
+            
+            for (i=0;i<airlinehost.length;i++)
+            {
+                htmlText += "<tr height=150px>";
+                if(typeof(airlinehost[i].getElementsByTagName("Airline")[0]) == 'undefined' || typeof(airlinehost[i].getElementsByTagName("Airline")[0].childNodes[0]) == 'undefined')
+                    Airline="";
+                else
+                    Airline = airlinehost[i].getElementsByTagName("Airline")[0].childNodes[0].nodeValue;
+                htmlText += "<td width=55px>"+Airline+"</td>";
+                
+                
+                if(typeof(airlinehost[i].getElementsByTagName("IATA")[0]) == 'undefined' || typeof(airlinehost[i].getElementsByTagName("IATA")[0].childNodes[0]) == 'undefined')
+                    IATA="";
+                else
+                    IATA = airlinehost[i].getElementsByTagName("IATA")[0].childNodes[0].nodeValue;
+                htmlText += "<td width=40px>"+IATA+"</td>";
+                
+                
+                if(typeof(airlinehost[i].getElementsByTagName("Hubs")[0]) == 'undefined')
+                    Hub=""
+                else
+                {
+                    Hubs = airlinehost[i].getElementsByTagName("Hub");
+                    htmlText+="<td width=150px><ul>";
+                    for(var j=0; j<Hubs.length; j++)
+                    {
+                    if(typeof(Hubs[j] )== 'undefined' || typeof(Hubs[j].childNodes[0]) == 'undefined')
+                        Hub="";
+				    else
+                        Hub = Hubs[j].childNodes[0].nodeValue;
+                       
+                    if(Hub==""){
+                        htmlText += "<li></li>";
+                    }
+                    else if(Hub==Hubs[0].childNodes[0].nodeValue){
+                       htmlText += "<li><b>"+Hub+"</b></li>"; 
+                    }
+                    else
+                    {
+                      htmlText += "<li>"+Hub+"</li>";
+                    }
+                    }
+                    htmlText+="</ul></td>";
+                }
+                
+                
+                if(typeof(airlinehost[i].getElementsByTagName("Notes")[0]) == 'undefined' || typeof(airlinehost[i].getElementsByTagName("Notes")[0].childNodes[0]) == 'undefined')
+                    Notes="";
+                else
+                    Notes = airlinehost[i].getElementsByTagName("Notes")[0].childNodes[0].nodeValue;
+                htmlText += "<td width=180px>"+Notes+"</td>";
+                
+                
+                if(typeof(airlinehost[i].getElementsByTagName("HomePage")[0]) == 'undefined' || typeof(airlinehost[i].getElementsByTagName("HomePage")[0].childNodes[0]) == 'undefined')
+                    HomePage="";
+                else
+                    HomePage = airlinehost[i].getElementsByTagName("HomePage")[0].childNodes[0].nodeValue;
+                htmlText += "<td width=180px><a href=\""+HomePage+"\" target=\"_blank\">"+HomePage+"</a></td>";
+                
+                
+                if(typeof(airlinehost[i].getElementsByTagName("Plane")[0]) == 'undefined' || typeof(airlinehost[i].getElementsByTagName("Plane")[0].childNodes[0]) == 'undefined')
+                    Plane="";
+                else
+                    Plane = airlinehost[i].getElementsByTagName("Plane")[0].childNodes[0].nodeValue;
+                 htmlText += "<td width=430px><img style='display:block; max-height:250px; height:100%; width: 100%;' src=\""+Plane+"\" /></td>";
+                 htmlText += "</tr>";
+                
+             }
+        
+             htmlText += "</table>"
+             htmlText += "<noscript></noscript>"
+             htmlText += "</body></html>"
+             result = window.open("", "", "scrollbars=yes, width=1050, scrollbars=2");
+             result.document.open();
+             result.document.write(htmlText);
+             result.document.close();
+        }
+        
+    </script>
+    <body>
+        <center>
+            <br> <br> <br> <br> 
+            <h3>Enter URL for Airlines List XML File</h3>
+            <form>
+                <input type="text" id="xmlfile">
+                <br> <br>    
+                <input type="button" value="Submit Query" onclick="validateXML()">
+            </form>
+        </center>
+        <noscript></noscript>
+    </body>
+</html>
